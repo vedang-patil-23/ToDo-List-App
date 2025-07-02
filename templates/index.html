@@ -1,0 +1,148 @@
+{% extends "base.html" %}
+{% block title %}My Tasks{% endblock %}
+{% block content %}
+<div class="row mb-4">
+    <div class="col-md-8">
+        <h1 class="mb-4">My Tasks</h1>
+    </div>
+    <div class="col-md-4 text-end">
+        <a href="{{ url_for('add_task') }}" class="btn btn-primary">
+            <i class="fas fa-plus me-2"></i>Add Task
+        </a>
+    </div>
+</div>
+<div class="card mb-4">
+    <div class="card-body">
+        <form method="GET" class="row g-3 align-items-end">
+            <div class="col-md-4">
+                <label class="form-label">Status</label>
+                <select class="form-select" name="status">
+                    <option value="all" {% if filter_status == 'all' %}selected{% endif %}>All</option>
+                    <option value="pending" {% if filter_status == 'pending' %}selected{% endif %}>Pending</option>
+                    <option value="completed" {% if filter_status == 'completed' %}selected{% endif %}>Completed</option>
+                </select>
+            </div>
+            <div class="col-md-4">
+                <label class="form-label">Priority</label>
+                <select class="form-select" name="priority">
+                    <option value="all" {% if filter_priority == 'all' %}selected{% endif %}>All</option>
+                    <option value="High" {% if filter_priority == 'High' %}selected{% endif %}>High</option>
+                    <option value="Medium" {% if filter_priority == 'Medium' %}selected{% endif %}>Medium</option>
+                    <option value="Low" {% if filter_priority == 'Low' %}selected{% endif %}>Low</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">Tag</label>
+                <input type="text" class="form-control" name="tag" placeholder="Filter by tag..." value="{{ filter_tag }}">
+            </div>
+            <div class="col-md-1">
+                <button type="submit" class="btn btn-primary w-100">
+                    <i class="fas fa-filter"></i>
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+<div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+    {% for task in tasks %}
+    <div class="col">
+        <div class="card h-100 {% if task.status == 'completed' %}border-success{% endif %}">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-start mb-2">
+                    <div class="d-flex align-items-center">
+                        {% if task.pinned %}
+                        <i class="fas fa-thumbtack pinned me-2" title="Pinned"></i>
+                        {% endif %}
+                        {% if task.starred %}
+                        <i class="fas fa-star starred me-2" title="Starred"></i>
+                        {% endif %}
+                        <span class="badge {% if task.priority == 'High' %}priority-high{% elif task.priority == 'Medium' %}priority-medium{% else %}priority-low{% endif %} me-2">
+                            {{ task.priority }}
+                        </span>
+                        <span class="badge bg-light text-dark me-2">
+                            {{ task.status|capitalize }}
+                        </span>
+                    </div>
+                    <div class="dropdown">
+                        <button class="btn btn-link text-dark" type="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-ellipsis-v"></i>
+                        </button>
+                        <ul class="dropdown-menu">
+                            <li>
+                                <form action="{{ url_for('toggle_status', id=task.id) }}" method="POST" class="d-inline">
+                                    <button type="submit" class="dropdown-item">
+                                        {% if task.status == 'pending' %}
+                                            <i class="fas fa-check me-2"></i>Mark Complete
+                                        {% else %}
+                                            <i class="fas fa-undo me-2"></i>Mark Pending
+                                        {% endif %}
+                                    </button>
+                                </form>
+                            </li>
+                            <li>
+                                <form action="{{ url_for('pin_task', id=task.id) }}" method="POST" class="d-inline">
+                                    <button type="submit" class="dropdown-item">
+                                        {% if task.pinned %}
+                                            <i class="fas fa-thumbtack me-2"></i>Unpin
+                                        {% else %}
+                                            <i class="fas fa-thumbtack me-2"></i>Pin
+                                        {% endif %}
+                                    </button>
+                                </form>
+                            </li>
+                            <li>
+                                <form action="{{ url_for('star_task', id=task.id) }}" method="POST" class="d-inline">
+                                    <button type="submit" class="dropdown-item">
+                                        {% if task.starred %}
+                                            <i class="fas fa-star me-2"></i>Unstar
+                                        {% else %}
+                                            <i class="fas fa-star me-2"></i>Star
+                                        {% endif %}
+                                    </button>
+                                </form>
+                            </li>
+                            <li><a class="dropdown-item" href="{{ url_for('edit_task', id=task.id) }}"><i class="fas fa-edit me-2"></i>Edit</a></li>
+                            <li>
+                                <form action="{{ url_for('delete_task', id=task.id) }}" method="POST" class="d-inline">
+                                    <button type="submit" class="dropdown-item text-danger" onclick="return confirm('Delete this task?')">
+                                        <i class="fas fa-trash me-2"></i>Delete
+                                    </button>
+                                </form>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+                <h5 class="card-title {% if task.status == 'completed' %}task-completed{% endif %}">
+                    {{ task.title }}
+                </h5>
+                <p class="card-text text-muted small">{{ task.description[:120] }}{% if task.description and task.description|length > 120 %}...{% endif %}</p>
+                {% if task.tags %}
+                <div class="mt-2">
+                    {% for tag in task.tags.split(',') %}
+                    <span class="tag">{{ tag.strip() }}</span>
+                    {% endfor %}
+                </div>
+                {% endif %}
+            </div>
+            <div class="card-footer bg-transparent d-flex justify-content-between align-items-center">
+                <small class="text-muted">
+                    <i class="fas fa-calendar-alt me-1"></i>
+                    {% if task.due_date %}Due: {{ task.due_date.strftime('%Y-%m-%d') }}{% else %}No due date{% endif %}
+                </small>
+                <small class="text-muted">
+                    <i class="fas fa-clock me-1"></i>
+                    {{ task.updated_at.strftime('%Y-%m-%d %H:%M') }}
+                </small>
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <div class="col-12">
+        <div class="alert alert-info">
+            <i class="fas fa-info-circle me-2"></i>
+            No tasks found. Start by adding your first task!
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %} 

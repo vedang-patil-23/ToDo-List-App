@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+{% block title %}Add New Task{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8 col-lg-6">
+        <div class="card shadow-lg border-0">
+            <div class="card-header bg-dark text-white text-center py-3 rounded-top">
+                <h4 class="mb-0"><i class="fas fa-plus-circle me-2"></i>Add New Task</h4>
+            </div>
+            <div class="card-body p-4">
+                <form method="POST">
+                    <div class="mb-3">
+                        <label for="title" class="form-label fw-bold">Title</label>
+                        <input type="text" class="form-control" id="title" name="title" required
+                               placeholder="e.g. Finish project report">
+                    </div>
+                    <div class="mb-3">
+                        <label for="description" class="form-label fw-bold">Description</label>
+                        <textarea class="form-control" id="description" name="description" rows="4"
+                                  placeholder="Add more details about your task..."></textarea>
+                    </div>
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-6">
+                            <label for="due_date" class="form-label fw-bold">Due Date</label>
+                            <input type="date" class="form-control" id="due_date" name="due_date">
+                        </div>
+                        <div class="col-md-6">
+                            <label for="priority" class="form-label fw-bold">Priority</label>
+                            <select class="form-select" id="priority" name="priority">
+                                <option value="Low">Low</option>
+                                <option value="Medium" selected>Medium</option>
+                                <option value="High">High</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="mb-4">
+                        <label for="tags" class="form-label fw-bold">Tags</label>
+                        <input type="text" class="form-control" id="tags" name="tags"
+                               placeholder="e.g. work, urgent, personal">
+                        <div class="form-text">Separate tags with commas</div>
+                    </div>
+                    <div class="form-check mb-3">
+                        <input class="form-check-input" type="checkbox" id="pinned" name="pinned">
+                        <label class="form-check-label" for="pinned"><i class="fas fa-thumbtack me-2"></i>Pin this task</label>
+                    </div>
+                    <div class="form-check mb-4">
+                        <input class="form-check-input" type="checkbox" id="starred" name="starred">
+                        <label class="form-check-label" for="starred"><i class="fas fa-star me-2"></i>Star this task</label>
+                    </div>
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-primary btn-lg">
+                            <i class="fas fa-save me-2"></i>Save Task
+                        </button>
+                        <a href="{{ url_for('index') }}" class="btn btn-outline-secondary btn-lg">
+                            <i class="fas fa-times me-2"></i>Cancel
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 
